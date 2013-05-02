@@ -1,0 +1,52 @@
+@charset "utf-8";
+/* CSS Document */
+.sgfmtree ul{
+ list-style:none;
+}
+.sgfmtree ins{display:inline-block; text-decoration:none; width:18px; height:18px; margin:0 0 0 0; padding:0;}
+.sgfmtree ul, .sgfmtree li { display:block; margin:0 0 0 0; padding:0 0 0 0; list-style-type:none;line-height:18px;white-space:nowrap;} 
+.sgfmtree li,
+.sgfmtree ins { background-image:url("../images/sgfmtree/d.png"); background-repeat:no-repeat; background-color:transparent; cursor:default;} 
+.sgfmtree li li { margin-left:16px; }
+.sgfmtree li{ background-position:-90px 0; background-repeat:repeat-y; mix-height:18px; _height:18px; }
+.sgfmtree .st-n-child { background-position:-36px 0px;}
+.sgfmtree a{display:inline-block;}
+.sgfmtree a:focus { outline: none; } 
+.sgfmtree li.st-last { background:transparent; }
+.sgfmtree .st-open{background-position:-72px 0px;}
+.sgfmtree .st-closed{ background-position:-54px 0px;}
+.sgfmtree .st-closed-icon { background-position:-56px -19px; }
+.sgfmtree .st-open-icon { background-position:-56px -37px; }
+.sgfmtree .st-n-child-icon{background-position:-56px -54px;}
+.sgfmtree .st-loading-icon { background:url("../images/sgfmtree/throbber.gif") center center no-repeat !important; }
+.sgfmtree .st-hovered {background:#d0eaf4;}
+.sgfmtree .st-clicked {color:#FF0000 !important; background:#78b0e3;}
+.sgfmtree a{ color:#000000; text-decoration:none; height:18px; line-height:18px; padding:0 2px 0 0;}
+.sgfmtree .treetext{padding:0; margin:0;border:1px #78b0e3 solid; background:#FFFFCC; height:16px; line-height:16px; font-size:12px; }
+.sgfmtree .st-icon{background-position:-72px -19px;}
+
+
+.sgfmtree a.st-checked .st_checkbox{ background-position:-38px -19px; }
+.sgfmtree a.st-unchecked .st_checkbox{ background-position:-2px -19px; }
+.sgfmtree a.st-undetermined .st_checkbox{ background-position:-20px -19px; }
+.sgfmtree a:hover.st-checked .st_checkbox{ background-position:-38px -37px; }
+.sgfmtree a:hover.st-unchecked .st_checkbox{ background-position:-2px -37px; }
+.sgfmtree a:hover.st-undetermined .st_checkbox{ background-position:-20px -37px; }
+
+.sgfmtree .st_user,.sgfmtree .st_set,.sgfmtree .st_statistics,.sgfmtree .st_money,.sgfmtree .st_gold{ 
+ background-image:url("../images/ico_big.gif");}
+.sgfmtree .st_user{background-position:0 -19px;}
+.sgfmtree .st_set{background-position:-60px 0;}
+.sgfmtree .st_statistics{background-position:-280px -19px;}
+.sgfmtree .st_gold{background-position:-80px 0;}
+.sgfmtree .st_money{background-position:-360px -19px;}
+.sgfmtree .st_football,.sgfmtree .st_billiards,.sgfmtree .st_basketball,.sgfmtree .st_golf,.sgfmtree .st_rugby,.sgfmtree .st_badminton,.sgfmtree .st_leaguematch,.sgfmtree .st_match{
+     background-image:url("../images/ball_ico.gif");}
+.sgfmtree .st_football{background-position:-19px 0;}
+.sgfmtree .st_billiards{background-position:0 0;}
+.sgfmtree .st_basketball{background-position:-36px 0;}
+.sgfmtree .st_golf{background-position:-54px 0;}
+.sgfmtree .st_rugby{background-position:0 -19px;}
+.sgfmtree .st_badminton{background-position:-19px -19px;}
+.sgfmtree .st_leaguematch{background-position:-54px -19px;}
+.sgfmtree .st_match{background-position:-36px -19px;}
