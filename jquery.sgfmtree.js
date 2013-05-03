@@ -72,74 +72,77 @@
 				forSearchId=settings.forSearchId; 
 			}
 			//临时变量
-			var d = false, tmp, i, j, ul1, ul2,mattr;	
+			var d = false, tmp, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata;
 			//对象不存在返回false
 			if(!js) { return d; }
 			if($.isFunction(js)) { 
 				js = js.call(this);
 			}
 			if($.isArray(js)) {
-				d = $();
-				if(!js.length) { 
+				d=document.createElement("ul");
+				len=js.length;
+				if(!len) { 
 					return false; 
 				} else{
-					for(i = 0, j = js.length; i < j; i++) {
-						tmp = this._parse_json(js[i],settings, true);
-						if(tmp.length) { d = d.add(tmp); }
-					}
-						//最后一个子节点增加最后节点样式
+					i=0;
+					do{
+						tmp = this._parse_json(js[i++],settings, true);
+						d.appendChild(tmp[0]);
+					}while(i<len);
+					//最后一个子节点增加最后节点样式
 					tmp.addClass("st-last");
+					d=$(d);
 				}
-			}else{
+			}
+			else{
 				if(typeof js == "string") { js = { data : {title:js} }; }
-				if(!js.data && js.data !== "") { return d; }
+				jsdata=js.data;
+				if(!jsdata && jsdata !== "") { return d; }
 				d = $("<li>");
 				if(js.attr) { d.attr(js.attr); }
-				d.data("sgfmtree", js.data); 
+				d.data("sgfmtree", jsdata); 
 				d.data("metadata", js.metadata); 
-				if(!$.isArray(js.data)) { js.data = [js.data]; }
 				var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
-				for(i=0,j=js.data.length;i<j;i++){ m=js.data[i];
-					tmp = $("<a>");
-					if($.isFunction(m)) { m = m.call(this, js); }
-					if(typeof m != "string") {
-						mattr=m.attr=m.attr||{};
-						if(!mattr.href) { mattr.href = '###'; }
-						mattr.title = m.title;
-					} else {
-					      mattr={'href':'###',"title":m}; 
-					}
-					//增加订阅搜索信息
-					if(forSearchId && /^string|number$/.test(typeof js.metadata[forSearchId])){
-						mattr["searchId"]=js.metadata[forSearchId];
-					}
-					if(typeRE.test(js.metadata.treetype)){
-						tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
-					}else{
-						if(!m.haschild){
-							tmp.prepend("<ins class='st-n-child-icon'>&#160;</ins>");
-						}else if(isOpen){
-							tmp.prepend("<ins class='st-open-icon'>&#160;</ins>");
-						}else{
-							tmp.prepend("<ins class='st-closed-icon'>&#160;</ins>");
-						}
-					}
-					
-					// 设置标签不可用点击
-					if(m.disabled){
-						tmp.css({cursor:"default",color:"#AAA"});
-						mattr["disabled"]="disabled";
-					}
-					
-					tmp.attr(mattr)["text"](m.title);
-					m.language && tmp.addClass(m.language); 
-					d.append(tmp);
-				};
-				if(isOpen){
-					d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-open":"st-n-child")+"' >&#160;</ins>");
-				}else{
-					d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-closed":"st-n-child")+"' >&#160;</ins>");
-				}
+				//------------------length:2000,chrome:400ms->190ms---------------------------
+				       	m=jsdata;
+					//tmp = $("<a>");
+					//if(typeof m == "string") {
+					//      mattr={'href':'###',"title":m}; 
+					//} else {
+					//	mattr=m.attr=m.attr||{};
+					//	if(!mattr.href) { mattr.href = '###'; }
+					//	mattr.title = m.title;
+					//}
+					////增加订阅搜索信息
+					//if(forSearchId && /^string|number$/.test(typeof js.metadata[forSearchId])){
+					//	mattr["searchId"]=js.metadata[forSearchId];
+					//}
+					//if(typeRE.test(js.metadata.treetype)){
+					//	tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
+					//}else{
+					//	if(!m.haschild){
+					//		tmp.prepend("<ins class='st-n-child-icon'>&#160;</ins>");
+					//	}else if(isOpen){
+					//		tmp.prepend("<ins class='st-open-icon'>&#160;</ins>");
+					//	}else{
+					//		tmp.prepend("<ins class='st-closed-icon'>&#160;</ins>");
+					//	}
+					//}
+					//
+					//// 设置标签不可用点击
+					//if(m.disabled){
+					//	tmp.css({cursor:"default",color:"#AAA"});
+					//	mattr["disabled"]="disabled";
+					//}
+					//
+					//tmp.attr(mattr).append(m.title);
+					//m.language && tmp.addClass(m.language); 
+					//d.append(tmp);
+				//---------------------------------------------
+
+				isOpenCls=isOpen?"st-open":"st-closed";
+				hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
+				d.prepend("<ins class ='"+hasChildCls+"' >&#160;</ins>");
 				//增加IP信息
 				if(js.metadata){
 					if(js.metadata.navigateFlag === "001"){
@@ -169,11 +172,6 @@
 						}
 					}
 				}
-			}
-			if(!is_callback) {
-				ul1 = $("<ul>");
-				ul1.append(d);
-				d = ul1;
 			}
 			return d;
 		},
@@ -311,7 +309,6 @@
 						instance["_init_event"](nt,tree,closeother);
 						t=new Date-t; console.log("_init_event:"+t);
 						t=new Date();
-					//$tree.append(nt);
 						tree.appendChild(nt[0]);
 						t=new Date-t; console.log("append:"+t);
 					}
