@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+	<title></title>
+	<script type="text/javascript" src="jquery.min.js"></script>
+</head>
+<body>
+	<a href="index.html">index.html</a>
+	<a href="index-origin.html">index-origin.html</a>
+	<a href="app.html">app.html</a>
+	<div id="d"></div>
+	<script type="text/javascript">
+		var nt=["<div>"];
+		for(var i=2000;i--;){
+			nt.push('<li><ins class="st-closed">&nbsp;</ins><a href="###" title="足球20" class=""><ins class="st-closed-icon">&nbsp;</ins>足球20</a></li>');
+			//nt.push("<div><a href='http//www.baidu.com'><span>hehe</span>baidu</a>123</div>");
+		}	
+nt.push("</div>");
+nt=$(nt.join(''));
+var d=document.getElementById('d');
+var t=new Date;
+d.appendChild(nt[0]);
+t=new Date-t;
+console.log(t);
+</script>	
+</body>
+</html>

@@ -1,5 +1,9 @@
 ﻿// JavaScript Document
 (function ($) {
+	//设置ie6缓存图片
+	if(!!window.ActiveXObject){
+		!window.XMLHttpRequest && document.execCommand("BackgroundImageCache", false, true);
+	}
 	var info={"toConfig":"点击配置","waiting":"请稍候...","getChildErr":"获取子节点失败！","noChildMsg":"没有子节点信息！",
 				"addNameErr":"名称不能为空且不能为纯数字，确定重新输入，取消不新增。","renameErr":"名称不能为空且不为能纯数字，请重新输入!",
 				"noDel":"有子节点不可以删除","paramErr":"参数格式错误失败！","addErr":"请求地址不存在！"},//国际化默认信息
@@ -12,6 +16,7 @@
 		}
 		if($.sgfmdialog){hesSgfmdialog=true;}
 	});
+
 	//树初始化,用于对树结构的初始化，以及方法调用
 	$.fn.sgfmtree = function(settings){
 		var isMethodCall = (typeof settings == 'string'),//是否方法调用
@@ -72,7 +77,7 @@
 				forSearchId=settings.forSearchId; 
 			}
 			//临时变量
-			var d = false, tmp, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata;
+			var d = false, tmp,a,attr,metadata, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata,stCls;
 			//对象不存在返回false
 			if(!js) { return d; }
 			if($.isFunction(js)) { 
@@ -85,7 +90,7 @@
 					return false; 
 				} else{
 					i=0;
-					do{
+				do{
 						tmp = this._parse_json(js[i++],settings, true);
 						d.appendChild(tmp[0]);
 					}while(i<len);
@@ -97,69 +102,77 @@
 			else{
 				if(typeof js == "string") { js = { data : {title:js} }; }
 				jsdata=js.data;
+				metadata=js.metadata;
 				if(!jsdata && jsdata !== "") { return d; }
 				d = $("<li>");
 				if(js.attr) { d.attr(js.attr); }
 				d.data("sgfmtree", jsdata); 
-				d.data("metadata", js.metadata); 
+				d.data("metadata", metadata); 
 				var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
-				//------------------length:2000,chrome:400ms->190ms---------------------------
-				       	m=jsdata;
-					//tmp = $("<a>");
-					//if(typeof m == "string") {
-					//      mattr={'href':'###',"title":m}; 
-					//} else {
-					//	mattr=m.attr=m.attr||{};
-					//	if(!mattr.href) { mattr.href = '###'; }
-					//	mattr.title = m.title;
-					//}
-					////增加订阅搜索信息
-					//if(forSearchId && /^string|number$/.test(typeof js.metadata[forSearchId])){
-					//	mattr["searchId"]=js.metadata[forSearchId];
-					//}
-					//if(typeRE.test(js.metadata.treetype)){
-					//	tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
-					//}else{
-					//	if(!m.haschild){
-					//		tmp.prepend("<ins class='st-n-child-icon'>&#160;</ins>");
-					//	}else if(isOpen){
-					//		tmp.prepend("<ins class='st-open-icon'>&#160;</ins>");
-					//	}else{
-					//		tmp.prepend("<ins class='st-closed-icon'>&#160;</ins>");
-					//	}
-					//}
-					//
-					//// 设置标签不可用点击
-					//if(m.disabled){
-					//	tmp.css({cursor:"default",color:"#AAA"});
-					//	mattr["disabled"]="disabled";
-					//}
-					//
-					//tmp.attr(mattr).append(m.title);
-					//m.language && tmp.addClass(m.language); 
-					//d.append(tmp);
+				//-----------a构造-------length:2000,chrome:400ms->190ms---------------------------
+					if(typeof jsdata == "string") {
+					      mattr={'href':'###',"title":jsdata}; 
+					} else {
+						mattr=jsdata.attr=jsdata.attr||{};
+						if(!mattr.href) { mattr.href = '###'; }
+						mattr.title = jsdata.title;
+					}
+					//增加订阅搜索信息
+					if(forSearchId && metadata && /^string|number$/.test(typeof metadata[forSearchId])){
+						mattr["searchId"]=metadata[forSearchId];
+					}
+
+					// 设置标签不可用点击
+					if(jsdata.disabled){
+						mattr["style"]="cursor:default;color:#aaa";
+						mattr["disabled"]="disabled";
+					}
+					//设置语言
+					if(jsdata.language){
+					       mattr['class']=jsdata.language; 
+					}
+					//设置标签图标样式	
+					if( metadata && typeRE.test(metadata.treetype)){
+						stCls='st-'+metadata.treetype;
+					}else if(!jsdata.haschild){
+						stCls='st-n-child-icon';
+					}else if(isOpen){
+						stCls='st-open-icon';
+					}else{
+						stCls='st-closed-icon';
+					}
+					//组装a
+					a=['<a'];
+					for(attr in mattr){
+						a.push(" "+attr+"="+mattr[attr]);
+					}
+					a.push("><ins class='"+stCls+"'>&#160;</ins>");
+					a.push(jsdata.title);
+					a.push("</a>");
+					a=a.join('');
 				//---------------------------------------------
 
 				isOpenCls=isOpen?"st-open":"st-closed";
 				hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
-				d.prepend("<ins class ='"+hasChildCls+"' >&#160;</ins>");
+				d.html("<ins class ='"+hasChildCls+"' >&#160;</ins>"+a);
+
 				//增加IP信息
-				if(js.metadata){
-					if(js.metadata.navigateFlag === "001"){
+				if(metadata){
+					if(metadata.navigateFlag === "001"){
 						d.append("<ins class='st-icon'>&#160;</ins>");
-					}else if(typeof js.metadata.mappingAddress !== "undefined" && js.metadata.mappingAddress != null){
-						var textValue = typeof js.metadata.mappingAddress === "string" ? js.metadata.mappingAddress : info.toConfig,
+					}else if(typeof metadata.mappingAddress !== "undefined" && metadata.mappingAddress != null){
+						var textValue = typeof metadata.mappingAddress === "string" ? metadata.mappingAddress : info.toConfig,
 							textObj = $("<input type='text' value='"+textValue+"' readonly='readonly' />")
 							.css({"margin-left":"8px","padding":"0","color":"#BBB","cursor":"pointer","border":"0px","background-color":"#FFF", "height":"16px","line-height":"16px","text-align":"center","font-size":"12px","width":"106px"});
 							d.append(textObj);
-						textload.call(textObj.get(0),js.metadata);
+						textload.call(textObj.get(0),metadata);
 					}
 				}
 				//加载子节点
 				if(js.children) { 
-					if($.isFunction(js.children)) {
-						js.children = js.children.call(this, js);
-					}
+					//if($.isFunction(js.children)) {
+					//	js.children = js.children.call(this, js);
+					//}
 					if($.isArray(js.children) && js.children.length) {
 						if(opennum>1){settings.opennum = --opennum;};
 						tmp = this._parse_json(js.children,settings, true);
@@ -387,20 +400,18 @@
 			}
 		},
 		
-		
-		
-		
-		
-		
 		//初始化树的事件
 		_init_event:function(obj,tree,closeother){
-			var instance = this,ins = $(obj).find("li > ins:first-child");
-			if(ins.length == 0){ins = $(obj).find("> ins:first-child");}
+			var instance,ins,$obj,a;
+			$obj=$(obj);	
+			instance = this;
+			ins = $obj.find("li > ins:first-child");
+			if(ins.length == 0){ins = $obj.find("> ins:first-child");}
 			ins.click(function(){
 				instance["_node_open_close"].apply(this,[instance,tree,closeother]);
 			});
-			$(obj).find("a").dblclick(function(){instance["_node_open_close"].apply($(this).prev().get(0),[instance,tree]);return false;});
-			$(obj).find("a:not([disabled])").click(function(){
+			$obj.find("a").dblclick(function(){instance["_node_open_close"].apply($(this).prev().get(0),[instance,tree]);return false;});
+			$obj.find("a:not([disabled])").click(function(){
 				$(tree).find("a.st-clicked").removeClass("st-clicked");
 				$(this).addClass("st-clicked");
 				var callback = $(tree).data("fun")._callback;
@@ -414,8 +425,6 @@
 				$(this).addClass("st-hovered");
 			});
 		},
-		
-		
 		
 		//子节点打开和关闭
 		_node_open_close:function(obj,tree,closeother){
@@ -920,6 +929,5 @@
 			return false;
 		}
 	}
-	
 	
 })(jQuery);
