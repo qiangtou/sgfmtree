@@ -90,12 +90,12 @@
 					return false; 
 				} else{
 					i=0;
-				do{
+					while(i<len){
 						tmp = this._parse_json(js[i++],settings, true);
-						d.appendChild(tmp[0]);
-					}while(i<len);
+						d.appendChild(tmp);
+					};
 					//最后一个子节点增加最后节点样式
-					tmp.addClass("st-last");
+					tmp.className="st-last";
 					d=$(d);
 				}
 			}
@@ -104,12 +104,21 @@
 				jsdata=js.data;
 				metadata=js.metadata;
 				if(!jsdata && jsdata !== "") { return d; }
-				d = $("<li>");
-				if(js.attr) { d.attr(js.attr); }
-				d.data("sgfmtree", jsdata); 
-				d.data("metadata", metadata); 
+				d = document.createElement("li");
+				if(js.attr) {
+					for (attr in js.attr){
+						d.setAttribute(attr,js.attr[attr]);
+					}
+				}
+				$.data(d,"sgfmtree",jsdata);
+				$.data(d,"metadata",metadata);
 				var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
-				//-----------a构造-------length:2000,chrome:400ms->190ms---------------------------
+
+				isOpenCls=isOpen?"st-open":"st-closed";
+				hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
+				tmp=["<ins class ='"+hasChildCls+"' >&#160;</ins>"];
+
+				//-----------构造a-------length:2000,chrome:400ms->190ms---------------------------
 					if(typeof jsdata == "string") {
 					      mattr={'href':'###',"title":jsdata}; 
 					} else {
@@ -142,32 +151,28 @@
 						stCls='st-closed-icon';
 					}
 					//组装a
-					a=['<a'];
+					tmp.push('<a');
 					for(attr in mattr){
-						a.push(" "+attr+"="+mattr[attr]);
+						tmp.push(" "+attr+"="+mattr[attr]);
 					}
-					a.push("><ins class='"+stCls+"'>&#160;</ins>");
-					a.push(jsdata.title);
-					a.push("</a>");
-					a=a.join('');
+					tmp.push("><ins class='"+stCls+"'>&#160;</ins>");
+					tmp.push(jsdata.title);
+					tmp.push("</a>");
 				//---------------------------------------------
-
-				isOpenCls=isOpen?"st-open":"st-closed";
-				hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
-				d.html("<ins class ='"+hasChildCls+"' >&#160;</ins>"+a);
 
 				//增加IP信息
 				if(metadata){
 					if(metadata.navigateFlag === "001"){
-						d.append("<ins class='st-icon'>&#160;</ins>");
+						tmp.push("<ins class='st-icon'>&#160;</ins>");
 					}else if(typeof metadata.mappingAddress !== "undefined" && metadata.mappingAddress != null){
 						var textValue = typeof metadata.mappingAddress === "string" ? metadata.mappingAddress : info.toConfig,
 							textObj = $("<input type='text' value='"+textValue+"' readonly='readonly' />")
 							.css({"margin-left":"8px","padding":"0","color":"#BBB","cursor":"pointer","border":"0px","background-color":"#FFF", "height":"16px","line-height":"16px","text-align":"center","font-size":"12px","width":"106px"});
-							d.append(textObj);
+							tmp.push(textObj);
 						textload.call(textObj.get(0),metadata);
 					}
 				}
+				d.innerHTML=tmp.join('');
 				//加载子节点
 				if(js.children) { 
 					//if($.isFunction(js.children)) {
@@ -175,13 +180,12 @@
 					//}
 					if($.isArray(js.children) && js.children.length) {
 						if(opennum>1){settings.opennum = --opennum;};
-						tmp = this._parse_json(js.children,settings, true);
-						if(tmp.length) {
-							ul2 = $("<ul>").append(tmp);
+						u12 = this._parse_json(js.children,settings, true);
+						if(u12.length) {
 							if(!isOpen){
-								ul2.hide();
+								u12.hide();
 							}
-							d.append(ul2);
+							d.appendChild(u12[0]);
 						}
 					}
 				}
@@ -314,13 +318,15 @@
 						}
 					}else{
 						var t;
+						//树的初始化树事件
 						t=new Date();
 						nt= instance["_parse_json"](json.data,settings);
 						t=new Date-t; console.log("_parse_json:"+t);
-						//树的初始化树事件
-						t=new Date();
-						instance["_init_event"](nt,tree,closeother);
-						t=new Date-t; console.log("_init_event:"+t);
+						setTimeout(function(){
+							t=new Date();
+							instance["_init_event"](nt,tree,closeother);
+							t=new Date-t; console.log("_init_event:"+t);
+						},20);
 						t=new Date();
 						tree.appendChild(nt[0]);
 						t=new Date-t; console.log("append:"+t);
