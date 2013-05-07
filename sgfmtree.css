@@ -50,3 +50,4 @@
 .sgfmtree .st_badminton{background-position:-19px -19px;}
 .sgfmtree .st_leaguematch{background-position:-54px -19px;}
 .sgfmtree .st_match{background-position:-36px -19px;}
+.sgfmtree .st_ip{margin-left:"8px";padding:"0";color:"#BBB";cursor:"pointer";border:"0";background-color:"#FFF"; height:"16px";line-height:"16px";text-align:"center";font-size:"12px";width:"106px";}

@@ -20,10 +20,10 @@
 	//树初始化,用于对树结构的初始化，以及方法调用
 	$.fn.sgfmtree = function(settings){
 		var isMethodCall = (typeof settings == 'string'),//是否方法调用
-			args = Array.prototype.slice.call(arguments, 1),//获取第一个参数以外的所有参数
-			returnValue = this,//返回对象
-			instance = $.sgfmtree;//树插件工具
-			
+		    args = Array.prototype.slice.call(arguments, 1),//获取第一个参数以外的所有参数
+		    returnValue = this,//返回对象
+		    instance = $.sgfmtree;//树插件工具
+
 		// 如果是下划线开头的方法不让访问
 		if(isMethodCall && settings.substring(0, 1) == '_') { return returnValue; }
 		// 如果一个方法的调用执行方法
@@ -49,7 +49,7 @@
 		// 返加jQuery对象	
 		return returnValue;
 	};
-	
+
 	//初始化所有参数
 	function init_params(settings){
 		if(!settings){settings = {};}
@@ -66,375 +66,384 @@
 		if(typeof settings.selectedClick !== "boolean"){settings.selectedClick=true;}
 		return settings;
 	}
-	
+
 	$.sgfmtree = {
 		//对json对象加载为树结构
 		_parse_json: function(js,settings,is_callback){
-			var textload=$.noop,opennum=1,forSearchId=false;
-			if(settings){
-				opennum=settings.opennum;
-				textload=settings.textload;
-				forSearchId=settings.forSearchId; 
-			}
-			//临时变量
-			var d = false, tmp,a,attr,metadata, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata,stCls;
-			//对象不存在返回false
-			if(!js) { return d; }
-			if($.isFunction(js)) { 
-				js = js.call(this);
-			}
-			if($.isArray(js)) {
-				d=document.createElement("ul");
-				len=js.length;
-				if(!len) { 
-					return false; 
-				} else{
-					i=0;
-					while(i<len){
-						tmp = this._parse_json(js[i++],settings, true);
-						d.appendChild(tmp);
-					};
-					//最后一个子节点增加最后节点样式
-					tmp.className="st-last";
-					d=$(d);
-				}
-			}
-			else{
-				if(typeof js == "string") { js = { data : {title:js} }; }
-				jsdata=js.data;
-				metadata=js.metadata;
-				if(!jsdata && jsdata !== "") { return d; }
-				d = document.createElement("li");
-				if(js.attr) {
-					for (attr in js.attr){
-						d.setAttribute(attr,js.attr[attr]);
-					}
-				}
-				$.data(d,"sgfmtree",jsdata);
-				$.data(d,"metadata",metadata);
-				var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
+				     var textload=$.noop,opennum=1,forSearchId=false;
+				     if(settings){
+					     opennum=settings.opennum;
+					     textload=settings.textload;
+					     forSearchId=settings.forSearchId; 
+				     }
+				     //临时变量
+				     var d = false, tmp,attr,metadata, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata,stCls;
+				     //对象不存在返回false
+				     if(!js) { return d; }
+				     if($.isFunction(js)) { 
+					     js = js.call(this);
+				     }
+				     if($.isArray(js)) {
+					     d=document.createElement("ul");
+					     len=js.length;
+					     if(!len) { 
+						     return false; 
+					     } else{
+						     i=0;
+						     while(i<len){
+							     tmp = this._parse_json(js[i++],settings, true);
+							     d.appendChild(tmp);
+						     };
+						     //最后一个子节点增加最后节点样式
+						     tmp.className="st-last";
+						     d=$(d);
+					     }
+				     }
+				     else{
+					     if(typeof js == "string") { js = { data : {title:js} }; }
+					     jsdata=js.data;
+					     metadata=js.metadata;
+					     if(!jsdata && jsdata !== "") { return d; }
+					     d = document.createElement("li");
+					     if(js.attr) {
+						     for (attr in js.attr){
+							     d.setAttribute(attr,js.attr[attr]);
+						     }
+					     }
+					     $.data(d,"sgfmtree",jsdata);
+					     $.data(d,"metadata",metadata);
+					     var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
 
-				isOpenCls=isOpen?"st-open":"st-closed";
-				hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
-				tmp=["<ins class ='"+hasChildCls+"' >&#160;</ins>"];
+					     isOpenCls=isOpen?"st-open":"st-closed";
+					     hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
+					     tmp=["<ins class ='"+hasChildCls+"' >&#160;</ins>"];
 
-				//-----------构造a-------length:2000,chrome:400ms->190ms---------------------------
-					if(typeof jsdata == "string") {
-					      mattr={'href':'###',"title":jsdata}; 
-					} else {
-						mattr=jsdata.attr=jsdata.attr||{};
-						if(!mattr.href) { mattr.href = '###'; }
-						mattr.title = jsdata.title;
-					}
-					//增加订阅搜索信息
-					if(forSearchId && metadata && /^string|number$/.test(typeof metadata[forSearchId])){
-						mattr["searchId"]=metadata[forSearchId];
-					}
+					     //-----------构造a-----------------------------------
+					     if(typeof jsdata == "string") {
+						     mattr={'href':'###',"title":jsdata}; 
+					     } else {
+						     mattr=jsdata.attr=jsdata.attr||{};
+						     if(!mattr.href) { mattr.href = '###'; }
+						     mattr.title = jsdata.title;
+					     }
+					     //增加订阅搜索信息
+					     if(forSearchId && metadata && /^string|number$/.test(typeof metadata[forSearchId])){
+						     mattr["searchId"]=metadata[forSearchId];
+					     }
 
-					// 设置标签不可用点击
-					if(jsdata.disabled){
-						mattr["style"]="cursor:default;color:#aaa";
-						mattr["disabled"]="disabled";
-					}
-					//设置语言
-					if(jsdata.language){
-					       mattr['class']=jsdata.language; 
-					}
-					//设置标签图标样式	
-					if( metadata && typeRE.test(metadata.treetype)){
-						stCls='st-'+metadata.treetype;
-					}else if(!jsdata.haschild){
-						stCls='st-n-child-icon';
-					}else if(isOpen){
-						stCls='st-open-icon';
-					}else{
-						stCls='st-closed-icon';
-					}
-					//组装a
-					tmp.push('<a');
-					for(attr in mattr){
-						tmp.push(" "+attr+"="+mattr[attr]);
-					}
-					tmp.push("><ins class='"+stCls+"'>&#160;</ins>");
-					tmp.push(jsdata.title);
-					tmp.push("</a>");
-				//---------------------------------------------
+					     // 设置标签不可用点击
+					     if(jsdata.disabled){
+						     mattr["style"]="cursor:default;color:#aaa";
+						     mattr["disabled"]="disabled";
+					     }
+					     //设置语言
+					     if(jsdata.language){
+						     mattr['class']=jsdata.language; 
+					     }
+					     //设置标签图标样式	
+					     if( metadata && typeRE.test(metadata.treetype)){
+						     stCls='st-'+metadata.treetype;
+					     }else if(!jsdata.haschild){
+						     stCls='st-n-child-icon';
+					     }else if(isOpen){
+						     stCls='st-open-icon';
+					     }else{
+						     stCls='st-closed-icon';
+					     }
+					     //组装a
+					     tmp.push('<a');
+					     for(attr in mattr){
+						     tmp.push(" "+attr+"="+mattr[attr]);
+					     }
+					     tmp.push("><ins class='"+stCls+"'>&#160;</ins>");
+					     tmp.push(jsdata.title);
+					     tmp.push("</a>");
+					     //---------------------------------------------
+					     d.innerHTML=tmp.join('');
+					     //增加IP信息
+					     if(metadata){
+						     if(metadata.navigateFlag === "001"){
+							     var ins=document.createElement("ins");
+							     ins.className="st-icon";
+							     ins.innerHtml="&#160;"
+								     d.appendChild(ins);
+						     }else if(typeof metadata.mappingAddress !== "undefined" && metadata.mappingAddress != null){
+							     var textValue = typeof metadata.mappingAddress === "string" ? metadata.mappingAddress : info.toConfig,
+								     input=document.createElement("input");
+							     input.type="text";
+							     input.value=textValue;
+							     input.readOnly=true;
+							     input.className="st-ip";
+							     d.appendChild(input);
+							     textload.call(input,metadata);
+						     }
+					     }
+					     //加载子节点
+					     if(js.children) { 
+						     //if($.isFunction(js.children)) {
+						     //	js.children = js.children.call(this, js);
+						     //}
+						     if($.isArray(js.children) && js.children.length) {
+							     if(opennum>1){settings.opennum --;};
+							     u12 = this._parse_json(js.children,settings, true);
+							     settings.opennum=opennum;
+							     if(u12.length) {
+								     if(!isOpen){
+									     u12.hide();
+								     }
+								     d.appendChild(u12[0]);
+							     }
+						     }
+					     }
+				     }
+				     return d;
+			     },
 
-				//增加IP信息
-				if(metadata){
-					if(metadata.navigateFlag === "001"){
-						tmp.push("<ins class='st-icon'>&#160;</ins>");
-					}else if(typeof metadata.mappingAddress !== "undefined" && metadata.mappingAddress != null){
-						var textValue = typeof metadata.mappingAddress === "string" ? metadata.mappingAddress : info.toConfig,
-							textObj = $("<input type='text' value='"+textValue+"' readonly='readonly' />")
-							.css({"margin-left":"8px","padding":"0","color":"#BBB","cursor":"pointer","border":"0px","background-color":"#FFF", "height":"16px","line-height":"16px","text-align":"center","font-size":"12px","width":"106px"});
-							tmp.push(textObj);
-						textload.call(textObj.get(0),metadata);
-					}
-				}
-				d.innerHTML=tmp.join('');
-				//加载子节点
-				if(js.children) { 
-					//if($.isFunction(js.children)) {
-					//	js.children = js.children.call(this, js);
-					//}
-					if($.isArray(js.children) && js.children.length) {
-						if(opennum>1){settings.opennum = --opennum;};
-						u12 = this._parse_json(js.children,settings, true);
-						if(u12.length) {
-							if(!isOpen){
-								u12.hide();
-							}
-							d.appendChild(u12[0]);
-						}
-					}
-				}
-			}
-			return d;
-		},
-		
-		
+
 		//对json对象加载为树checkbox结构
 		_parse_checkbox: function(js,opennum, is_callback){
-			if(isNaN(opennum)){opennum=1;}
-			//临时变量
-			var d = false, tmp, i, j, ul1, ul2;	
-			//对象不存在返回false
-			if(!js) { return d; }
-			if($.isFunction(js)) { 
-				js = js.call(this);
-			}
-			if($.isArray(js)) {
-				d = $();
-				if(!js.length) { return false; }
-				for(i = 0, j = js.length; i < j; i++) {
-					tmp = this._parse_checkbox(js[i],opennum, true);
-					//最后一个子节点增加最后节点样式
-					if(i == j-1) {tmp.addClass("st-last");} 
-					if(tmp.length) { d = d.add(tmp); }
-				}
-			}else{
-				if(typeof js == "string") { js = { data : {title:js} }; }
-				if(!js.data && js.data !== "") { return d; }
-				d = $("<li>");
-				if(js.attr) { d.attr(js.attr); }
-				d.data("sgfmtree", js.data); 
-				d.data("metadata", js.metadata); 
-				if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
-				var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
-				$.each(js.data, function (i, m) {
-					tmp = $("<a>");
-					if($.isFunction(m)) { m = m.call(this, js); }
-					if(typeof m == "string") { tmp.attr('href','###')["text"](m); }
-					else {
-						if(!m.attr) { m.attr = {}; }
-						if(!m.attr.href) { m.attr.href = '###';}
-						tmp.attr(m.attr)["text"](m.title);
-						if(m.language) { tmp.addClass(m.language); }
-					}	
-					if(typeRE.test(js.metadata.treetype)){
-						tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
-					}else{
-						tmp.prepend("<ins class='st_checkbox'>&#160;</ins>");
-						if(js.metadata && js.metadata.checked === "yes"){
-							tmp.addClass("st-checked");
-						}else{
-							tmp.addClass("st-unchecked");
-						}
-					}
-					d.append(tmp);
-				});
-				if(isOpen){
-					d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-open":"st-n-child")+"' >&#160;</ins>");
-				}else{
-					d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-closed":"st-n-child")+"' >&#160;</ins>");
-				}
-				if(js.metadata.redFont){
-					d.append("<span class='f30'>"+js.metadata.redFont+"</span>");
-				}
-				//加载子节点
-				if(js.children) { 
-					if($.isFunction(js.children)) {
-						js.children = js.children.call(this, js);
-					}
-					if($.isArray(js.children) && js.children.length) {
-						if(opennum>1){--opennum;};
-						tmp = this._parse_checkbox(js.children,opennum, true);
-						if(tmp.length) {
-							ul2 = $("<ul>").append(tmp);
-							if(!isOpen){ul2.hide();}
-							
-							d.append(ul2);
-						}
-					}
-				}
-			}
-			if(!is_callback) {
-				ul1 = $("<ul>");
-				ul1.append(d);
-				d = ul1;
-			}
-			return d;
-		},
+					 if(isNaN(opennum)){opennum=1;}
+					 //临时变量
+					 var d = false, tmp, i, j, ul1, ul2;	
+					 //对象不存在返回false
+					 if(!js) { return d; }
+					 if($.isFunction(js)) { 
+						 js = js.call(this);
+					 }
+					 if($.isArray(js)) {
+						 d = $();
+						 if(!js.length) { return false; }
+						 for(i = 0, j = js.length; i < j; i++) {
+							 tmp = this._parse_checkbox(js[i],opennum, true);
+							 //最后一个子节点增加最后节点样式
+							 if(i == j-1) {tmp.addClass("st-last");} 
+							 if(tmp.length) { d = d.add(tmp); }
+						 }
+					 }else{
+						 if(typeof js == "string") { js = { data : {title:js} }; }
+						 if(!js.data && js.data !== "") { return d; }
+						 d = $("<li>");
+						 if(js.attr) { d.attr(js.attr); }
+						 d.data("sgfmtree", js.data); 
+						 d.data("metadata", js.metadata); 
+						 if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
+						 var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
+						 $.each(js.data, function (i, m) {
+							 tmp = $("<a>");
+							 if($.isFunction(m)) { m = m.call(this, js); }
+							 if(typeof m == "string") { tmp.attr('href','###')["text"](m); }
+							 else {
+								 if(!m.attr) { m.attr = {}; }
+								 if(!m.attr.href) { m.attr.href = '###';}
+								 tmp.attr(m.attr)["text"](m.title);
+								 if(m.language) { tmp.addClass(m.language); }
+							 }	
+						 if(typeRE.test(js.metadata.treetype)){
+							 tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
+						 }else{
+							 tmp.prepend("<ins class='st_checkbox'>&#160;</ins>");
+							 if(js.metadata && js.metadata.checked === "yes"){
+								 tmp.addClass("st-checked");
+							 }else{
+								 tmp.addClass("st-unchecked");
+							 }
+						 }
+						 d.append(tmp);
+						 });
+						 if(isOpen){
+							 d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-open":"st-n-child")+"' >&#160;</ins>");
+						 }else{
+							 d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-closed":"st-n-child")+"' >&#160;</ins>");
+						 }
+						 if(js.metadata.redFont){
+							 d.append("<span class='f30'>"+js.metadata.redFont+"</span>");
+						 }
+						 //加载子节点
+						 if(js.children) { 
+							 if($.isFunction(js.children)) {
+								 js.children = js.children.call(this, js);
+							 }
+							 if($.isArray(js.children) && js.children.length) {
+								 if(opennum>1){--opennum;};
+								 tmp = this._parse_checkbox(js.children,opennum, true);
+								 if(tmp.length) {
+									 ul2 = $("<ul>").append(tmp);
+									 if(!isOpen){ul2.hide();}
+
+									 d.append(ul2);
+								 }
+							 }
+						 }
+					 }
+					 if(!is_callback) {
+						 ul1 = $("<ul>");
+						 ul1.append(d);
+						 d = ul1;
+					 }
+					 return d;
+				 },
 		//初始化树对象的事件
 		_init:function(settings,callback){
-			var tree = this,
-				url = settings.url,
-				params = settings.params,
-				treetype = settings.treetype,
-				linkage = settings.linkage,
-				textload = settings.textload,
-				closeother = settings.closeother,
-				opennum = settings.opennum;
-			$(tree).data("url",url);
-			get_info(settings,params,function(json){
-				if(json.returncode == 0){
-					var instance =  $.sgfmtree,$tree=$(tree).empty(),
-						//初始化树
-					    nt;
-					if($.isFunction(callback)){$(tree).data("fun",{"_callback":callback});}
-					if(treetype === "checkbox"){
-						nt= instance["_parse_checkbox"](json.data,opennum);
-						//树的初始化树事件
-						instance["_checkbox_event"](nt,tree,linkage,closeother,opennum);
-						
-						$tree.append(nt);
-						if(linkage===true){
-							var trees = nt.find("li:has(ul)");
-							trees.each(function(){
-								var hasChecked = $(this).children("ul").has(".st-checked,.st-undetermined").length,
-									hasUnchecked = $(this).children("ul").has(".st-unchecked").length;
-								if(hasChecked && hasUnchecked ){
-									$(this).children("a").removeClass("st-checked st-unchecked").addClass("st-undetermined");
-								}else if(hasChecked){
-									$(this).children("a").removeClass("st-unchecked st-undetermined").addClass("st-checked");
-								}else{
-									$(this).children("a").removeClass("st-checked st-undetermined").addClass("st-unchecked");
-								}
-							});
-						}else if(linkage==="onlyoption"){
-							nt.find("li>a.st-checked").siblings("ul").find("li>a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
-							nt.find("li>a.st-unchecked").parent("li").has("a.st-checked").children("a").removeClass("st-unchecked").addClass("st-nchecked");
-						}
-					}else{
-						var t;
-						//树的初始化树事件
-						t=new Date();
-						nt= instance["_parse_json"](json.data,settings);
-						t=new Date-t; console.log("_parse_json:"+t);
-						setTimeout(function(){
-							t=new Date();
-							instance["_init_event"](nt,tree,closeother);
-							t=new Date-t; console.log("_init_event:"+t);
-						},20);
-						t=new Date();
-						tree.appendChild(nt[0]);
-						t=new Date-t; console.log("append:"+t);
-					}
-					//进行订阅选择
-					if(settings.selectedId){
-						var selectLi=$tree.find("a[searchId='"+settings.selectedId+"']");
-						if(settings.selectedClick){
-							selectLi.click()
-						}else{
-							selectLi.addClass("st-clicked");
-						}
-						selectLi.parents("ul:hidden").each(function(){
-							var $ul = $(this);
-							$ul.show();
-							$ul.siblings("ins.st-closed").removeClass("st-closed").addClass("st-open");
-							$ul.siblings("a").children("ins.st-closed-icon").removeClass("st-closed-icon").addClass("st-open-icon");
-						});
-					}
-				}
-			},$.noop);
-					},
+			      var tree = this,
+			      url = settings.url,
+			      params = settings.params,
+			      treetype = settings.treetype,
+			      linkage = settings.linkage,
+			      textload = settings.textload,
+			      closeother = settings.closeother,
+			      opennum = settings.opennum;
+			      $(tree).data("url",url);
+			      get_info(settings,params,function(json){
+				      if(json.returncode == 0){
+					      var instance =  $.sgfmtree,$tree=$(tree).empty(),
+				      //初始化树
+				      nt;
+			      if($.isFunction(callback)){$(tree).data("fun",{"_callback":callback});}
+			      if(treetype === "checkbox"){
+				      nt= instance["_parse_checkbox"](json.data,opennum);
+				      //树的初始化树事件
+				      instance["_checkbox_event"](nt,tree,linkage,closeother,opennum);
+
+				      $tree.append(nt);
+				      if(linkage===true){
+					      var trees = nt.find("li:has(ul)");
+					      trees.each(function(){
+						      var hasChecked = $(this).children("ul").has(".st-checked,.st-undetermined").length,
+						      hasUnchecked = $(this).children("ul").has(".st-unchecked").length;
+					      if(hasChecked && hasUnchecked ){
+						      $(this).children("a").removeClass("st-checked st-unchecked").addClass("st-undetermined");
+					      }else if(hasChecked){
+						      $(this).children("a").removeClass("st-unchecked st-undetermined").addClass("st-checked");
+					      }else{
+						      $(this).children("a").removeClass("st-checked st-undetermined").addClass("st-unchecked");
+					      }
+					      });
+				      }else if(linkage==="onlyoption"){
+					      nt.find("li>a.st-checked").siblings("ul").find("li>a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
+					      nt.find("li>a.st-unchecked").parent("li").has("a.st-checked").children("a").removeClass("st-unchecked").addClass("st-nchecked");
+				      }
+			      }else{
+				      var t;
+				      //树的初始化树事件
+				      t=new Date();
+				      nt= instance["_parse_json"](json.data,settings);
+				      t=new Date-t; console.log("_parse_json:"+t);
+				      setTimeout(function(){
+					      t=new Date();
+					      instance["_init_event"](nt,tree,closeother);
+					      t=new Date-t; console.log("_init_event:"+t);
+				      },15);
+				      t=new Date();
+				      tree.appendChild(nt[0]);
+				      t=new Date-t; console.log("append:"+t);
+			      }
+			      //进行订阅选择
+			      if(settings.selectedId){
+				      var selectLi=$tree.find("a[searchId='"+settings.selectedId+"']");
+				      if(settings.selectedClick){
+					      selectLi.click()
+				      }else{
+					      selectLi.addClass("st-clicked");
+				      }
+				      selectLi.parents("ul:hidden").each(function(){
+					      var $ul = $(this);
+					      $ul.show();
+					      $ul.siblings("ins.st-closed").removeClass("st-closed").addClass("st-open");
+					      $ul.siblings("a").children("ins.st-closed-icon").removeClass("st-closed-icon").addClass("st-open-icon");
+				      });
+			      }
+				      }
+			      },$.noop);
+		      },
 		//初始化树的事件
 		_checkbox_event:function(obj,tree,linkage,closeother){
-			var instance = this,ins = $(obj).find("li > ins:first-child");
-			if(ins.length == 0){ins = $(obj).find("> ins:first-child");}
-			ins.click(function(){
-				instance["_node_open_close"].apply(this,[instance,tree,closeother]);
-			});
+					var instance = this,ins = $(obj).find("li > ins:first-child");
+					if(ins.length == 0){ins = $(obj).find("> ins:first-child");}
+					ins.click(function(){
+						instance["_node_open_close"].apply(this,[instance,tree,closeother]);
+					});
 
-			$(obj).find("a").click(function(){
- 				var callback = $(tree).data("fun")._callback;
-				if($.isFunction(callback)){callback.apply($(this).parent().get(0));
-				instance["_checkbox_click"].call(this,linkage);return false;
-				}
-			});
-		},
+					$(obj).find("a").click(function(){
+						var callback = $(tree).data("fun")._callback;
+						if($.isFunction(callback)){callback.apply($(this).parent().get(0));
+							instance["_checkbox_click"].call(this,linkage);return false;
+						}
+					});
+				},
 		_checkbox_click:function(linkage){
-			var $this = $(this),removeClass,addClass,removeChildClass;
-			if(linkage==="onlyoption"){
-				if($this.is(".st-checked")){
-					$this.removeClass("st-checked").addClass("st-unchecked")
-					$this.siblings("ul").find("li > a.st-nchecked").removeClass("st-nchecked").addClass("st-unchecked");
-					$this.parent().parentsUntil("","li").not(":has(a.st-checked)").children("a.st-nchecked").removeClass("st-nchecked").addClass("st-unchecked");
-				}else if($this.is(".st-unchecked")){
-					$this.removeClass("st-unchecked").addClass("st-checked");
-					$this.siblings("ul").find("li > a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
-					$this.parent().parentsUntil("","li").has("a.st-checked").children("a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
-				}
-				return;
-			}
-			if($this.is(".st-checked")){
-				removeClass=removeChildClass="st-checked";addClass="st-unchecked";
-			}else if($this.is(".st-unchecked")){
-				removeClass=removeChildClass="st-unchecked";addClass="st-checked";
-			}else{
-				removeClass="st-undetermined";addClass="st-checked";
-				removeChildClass="st-unchecked st-undetermined";
-			}
-			//处理节点的选中状态
-			$this.removeClass(removeClass).addClass(addClass);
-			//处理节点中的了节点选中状态_当节点的选中状态影响子节点和父节点时才需要处理
-			if(linkage===true){
-				$this.siblings("ul").find("li > a").removeClass(removeChildClass).addClass(addClass);
-				var trees = $this.parent().parentsUntil("","li");
-				trees.each(function(){
-					var hasChecked = $(this).children("ul").has(".st-checked,.st-undetermined").length > 0,
-						hasUnchecked = $(this).children("ul").has(".st-unchecked").length > 0;
-					if(hasChecked && hasUnchecked ){
-						$(this).children("a").removeClass("st-checked st-unchecked").addClass("st-undetermined");
-					}else if(hasChecked){
-						$(this).children("a").removeClass("st-unchecked st-undetermined").addClass("st-checked");
-					}else{
-						$(this).children("a").removeClass("st-checked st-undetermined").addClass("st-unchecked");
+					var $this = $(this),removeClass,addClass,removeChildClass;
+					if(linkage==="onlyoption"){
+						if($this.is(".st-checked")){
+							$this.removeClass("st-checked").addClass("st-unchecked")
+								$this.siblings("ul").find("li > a.st-nchecked").removeClass("st-nchecked").addClass("st-unchecked");
+							$this.parent().parentsUntil("","li").not(":has(a.st-checked)").children("a.st-nchecked").removeClass("st-nchecked").addClass("st-unchecked");
+						}else if($this.is(".st-unchecked")){
+							$this.removeClass("st-unchecked").addClass("st-checked");
+							$this.siblings("ul").find("li > a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
+							$this.parent().parentsUntil("","li").has("a.st-checked").children("a.st-unchecked").removeClass("st-unchecked").addClass("st-nchecked");
+						}
+						return;
 					}
-				});
-			}
-		},
-		
+					if($this.is(".st-checked")){
+						removeClass=removeChildClass="st-checked";addClass="st-unchecked";
+					}else if($this.is(".st-unchecked")){
+						removeClass=removeChildClass="st-unchecked";addClass="st-checked";
+					}else{
+						removeClass="st-undetermined";addClass="st-checked";
+						removeChildClass="st-unchecked st-undetermined";
+					}
+					//处理节点的选中状态
+					$this.removeClass(removeClass).addClass(addClass);
+					//处理节点中的了节点选中状态_当节点的选中状态影响子节点和父节点时才需要处理
+					if(linkage===true){
+						$this.siblings("ul").find("li > a").removeClass(removeChildClass).addClass(addClass);
+						var trees = $this.parent().parentsUntil("","li");
+						trees.each(function(){
+							var hasChecked = $(this).children("ul").has(".st-checked,.st-undetermined").length > 0,
+							hasUnchecked = $(this).children("ul").has(".st-unchecked").length > 0;
+						if(hasChecked && hasUnchecked ){
+							$(this).children("a").removeClass("st-checked st-unchecked").addClass("st-undetermined");
+						}else if(hasChecked){
+							$(this).children("a").removeClass("st-unchecked st-undetermined").addClass("st-checked");
+						}else{
+							$(this).children("a").removeClass("st-checked st-undetermined").addClass("st-unchecked");
+						}
+						});
+					}
+				},
+
 		//初始化树的事件
 		_init_event:function(obj,tree,closeother){
-			var instance,ins,$obj,a;
-			$obj=$(obj);	
-			instance = this;
-			ins = $obj.find("li > ins:first-child");
-			if(ins.length == 0){ins = $obj.find("> ins:first-child");}
-			ins.click(function(){
-				instance["_node_open_close"].apply(this,[instance,tree,closeother]);
-			});
-			$obj.find("a").dblclick(function(){instance["_node_open_close"].apply($(this).prev().get(0),[instance,tree]);return false;});
-			$obj.find("a:not([disabled])").click(function(){
-				$(tree).find("a.st-clicked").removeClass("st-clicked");
-				$(this).addClass("st-clicked");
-				var callback = $(tree).data("fun")._callback;
-				if($.isFunction(callback)){callback.apply($(this).parent().get(0));}
-				return false;
-			})
-			.mouseout(function(){
-				$(this).removeClass("st-hovered");
-			})
-			.mouseover(function(){
-				$(this).addClass("st-hovered");
-			});
-		},
-		
+				    var instance,ins,$obj,a;
+				    $obj=$(obj);	
+				    instance = this;
+				    insSelector = "li > ins:first-child";
+				    //???if(insSelector.length == 0){insSelector = "> ins:first-child";}
+				    $obj.delegate(insSelector,"click",function(){
+				    	instance["_node_open_close"].apply(this,[instance,tree,closeother]);
+				    });
+				    $obj.delegate("a","dblclick",function(){
+					    instance["_node_open_close"].apply($(this).prev()[0],[instance,tree]);return false;
+				    });$obj.delegate("a:not([disabled])",{
+					    "click":function(){
+						    $(tree).find("a.st-clicked").removeClass("st-clicked");
+						    $(this).addClass("st-clicked");
+						    var callback = $(tree).data("fun")._callback;
+						    if($.isFunction(callback)){callback.apply($(this).parent().get(0));}
+						    return false;
+					    },
+					    "mouseout":function(){
+						    $(this).removeClass("st-hovered");
+					    },
+					    "mouseover":function(){
+						    $(this).addClass("st-hovered");
+					    }
+				    });
+			    },
+
 		//子节点打开和关闭
 		_node_open_close:function(obj,tree,closeother){
-			var li = $(this).parent("li"),ins = this;
+					 var li = $(this).parent("li"),ins = this;
 			if(li.data("sgfmtree").haschild){
 				if(li.has("ul").length > 0){
 					$(this).siblings("ul").slideToggle(100,function(){
