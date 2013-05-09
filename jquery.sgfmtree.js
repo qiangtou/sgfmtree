@@ -179,19 +179,19 @@
 						     }
 					     }
 					     //加载子节点
-					     if(js.children) { 
+					     if(js.children) {
 						     //if($.isFunction(js.children)) {
 						     //	js.children = js.children.call(this, js);
 						     //}
 						     if($.isArray(js.children) && js.children.length) {
 							     if(opennum>1){settings.opennum --;};
-							     u12 = this._parse_json(js.children,settings, true);
+							     ul2 = this._parse_json(js.children,settings, true);
 							     settings.opennum=opennum;
-							     if(u12.length) {
+							     if(ul2.length) {
 								     if(!isOpen){
-									     u12.hide();
+									     ul2.hide();
 								     }
-								     d.appendChild(u12[0]);
+								     d.appendChild(ul2[0]);
 							     }
 						     }
 					     }
@@ -204,81 +204,94 @@
 		_parse_checkbox: function(js,opennum, is_callback){
 					 if(isNaN(opennum)){opennum=1;}
 					 //临时变量
-					 var d = false, tmp, i, j, ul1, ul2;	
+					 var d = false, tmp,attr,metadata, i, j, ul1, ul2,mattr,len,isOpenCls,hasChildCls,jsdata,stCls,cls;
 					 //对象不存在返回false
 					 if(!js) { return d; }
 					 if($.isFunction(js)) { 
 						 js = js.call(this);
 					 }
 					 if($.isArray(js)) {
-						 d = $();
-						 if(!js.length) { return false; }
-						 for(i = 0, j = js.length; i < j; i++) {
-							 tmp = this._parse_checkbox(js[i],opennum, true);
+						 d=document.createElement("ul");
+						 len=js.length;
+						 if(!len) { 
+							 return false; 
+						 } else{
+							 i=0;
+							 while(i<len){
+								 tmp = this._parse_checkbox(js[i++],opennum, true);
+								 d.appendChild(tmp);
+							 }
 							 //最后一个子节点增加最后节点样式
-							 if(i == j-1) {tmp.addClass("st-last");} 
-							 if(tmp.length) { d = d.add(tmp); }
+							 tmp.className="st-last";
+							 d=$(d);
 						 }
-					 }else{
+					 }
+					 else{
 						 if(typeof js == "string") { js = { data : {title:js} }; }
+						 jsdata=js.data;
+						 metadata=js.metadata;
 						 if(!js.data && js.data !== "") { return d; }
-						 d = $("<li>");
-						 if(js.attr) { d.attr(js.attr); }
-						 d.data("sgfmtree", js.data); 
-						 d.data("metadata", js.metadata); 
-						 if(!$.isArray(js.data)) { tmp = js.data; js.data = []; js.data.push(tmp); }
-						 var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
-						 $.each(js.data, function (i, m) {
-							 tmp = $("<a>");
-							 if($.isFunction(m)) { m = m.call(this, js); }
-							 if(typeof m == "string") { tmp.attr('href','###')["text"](m); }
-							 else {
-								 if(!m.attr) { m.attr = {}; }
-								 if(!m.attr.href) { m.attr.href = '###';}
-								 tmp.attr(m.attr)["text"](m.title);
-								 if(m.language) { tmp.addClass(m.language); }
-							 }	
-						 if(typeRE.test(js.metadata.treetype)){
-							 tmp.prepend("<ins class='st_"+js.metadata.treetype+"'>&#160;</ins>");
-						 }else{
-							 tmp.prepend("<ins class='st_checkbox'>&#160;</ins>");
-							 if(js.metadata && js.metadata.checked === "yes"){
-								 tmp.addClass("st-checked");
-							 }else{
-								 tmp.addClass("st-unchecked");
+						 d =document.createElement("li"); 
+						 if(js.attr) {
+							 for (attr in js.attr){
+								 d.setAttribute(attr,js.attr[attr]);
 							 }
 						 }
-						 d.append(tmp);
-						 });
-						 if(isOpen){
-							 d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-open":"st-n-child")+"' >&#160;</ins>");
-						 }else{
-							 d.prepend("<ins class ='"+(d.data("sgfmtree").haschild?"st-closed":"st-n-child")+"' >&#160;</ins>");
-						 }
-						 if(js.metadata.redFont){
-							 d.append("<span class='f30'>"+js.metadata.redFont+"</span>");
-						 }
-						 //加载子节点
-						 if(js.children) { 
-							 if($.isFunction(js.children)) {
-								 js.children = js.children.call(this, js);
-							 }
-							 if($.isArray(js.children) && js.children.length) {
-								 if(opennum>1){--opennum;};
-								 tmp = this._parse_checkbox(js.children,opennum, true);
-								 if(tmp.length) {
-									 ul2 = $("<ul>").append(tmp);
-									 if(!isOpen){ul2.hide();}
+						 $.data(d,"sgfmtree",jsdata);
+						 $.data(d,"metadata",metadata);
 
-									 d.append(ul2);
+						 var isOpen = opennum!==1 && $.isArray(js.children) && js.children.length >0;
+						 isOpenCls=isOpen?"st-open":"st-closed";
+						 hasChildCls=jsdata.haschild?isOpenCls:"st-n-child";
+						 tmp=["<ins class ='"+hasChildCls+"' >&#160;</ins>"];
+						 //-----------构造a-----------------------------------
+							 if(typeof jsdata == "string") {
+								 mattr={'href':'###',"title":jsdata}; 
+							 }else {
+								 mattr=jsdata.attr=jsdata.attr||{};
+								 if(!mattr.href) { mattr.href = '###'; }
+								 mattr.title = jsdata.title;
+								 if(jsdata.language) {
+									 mattr['class']=jsdata.language; 
+								 }
+							 }	
+						 if(metadata && typeRE.test(metadata.treetype)){
+						     stCls='st-'+metadata.treetype;
+						 }else{
+							 stCls="st_checkbox";
+							 if(metadata && metadata.checked === "yes"){
+								 checkedCls="st-checked";
+							 }else{
+								 checkedCls="st-unchecked";
+							 }
+							 cls=mattr["class"]?mattr["class"]+' ':'';
+							 mattr["class"]=cls+checkedCls;
+
+						 }
+					     tmp.push('<a');
+					     for(attr in mattr){
+						     tmp.push(" "+attr+"='"+mattr[attr]+"'");
+					     }
+					     tmp.push("><ins class='"+stCls+"'>&#160;</ins>");
+					     metadata.redFont && tmp.push("<span class='f30'>"+metadata.redFont+"</span>");
+					     tmp.push(jsdata.title);
+					     tmp.push("</a>");
+					     d.innerHTML=tmp.join('');
+					     //---------------------------------------------
+						 //加载子节点
+						 if(js.children) {
+							 //if($.isFunction(js.children)) {
+							 //        js.children = js.children.call(this, js);
+							 //}
+							 if($.isArray(js.children) && js.children.length) {
+							     if(opennum>1){opennum --;};
+								 ul2 = this._parse_checkbox(js.children,opennum, true);
+								 if(ul2.length) {
+									 if(!isOpen){ul2.hide();}
+									 d.appendChild(ul2[0]);
 								 }
 							 }
 						 }
-					 }
-					 if(!is_callback) {
-						 ul1 = $("<ul>");
-						 ul1.append(d);
-						 d = ul1;
 					 }
 					 return d;
 				 },
@@ -299,12 +312,16 @@
 				      //初始化树
 				      nt;
 			      if($.isFunction(callback)){$(tree).data("fun",{"_callback":callback});}
+			      var t;
 			      if(treetype === "checkbox"){
+				      t=new Date;
 				      nt= instance["_parse_checkbox"](json.data,opennum);
+				      console.log("_parse_checkbox:"+(new Date-t));
 				      //树的初始化树事件
+				      t=new Date;
 				      instance["_checkbox_event"](nt,tree,linkage,closeother,opennum);
-
-				      $tree.append(nt);
+				      console.log("_checkbox_event:"+(new Date-t));
+				      tree.appendChild(nt[0]);
 				      if(linkage===true){
 					      var trees = nt.find("li:has(ul)");
 					      trees.each(function(){
@@ -323,16 +340,13 @@
 					      nt.find("li>a.st-unchecked").parent("li").has("a.st-checked").children("a").removeClass("st-unchecked").addClass("st-nchecked");
 				      }
 			      }else{
-				      var t;
 				      //树的初始化树事件
 				      t=new Date();
 				      nt= instance["_parse_json"](json.data,settings);
 				      t=new Date-t; console.log("_parse_json:"+t);
-				      setTimeout(function(){
-					      t=new Date();
-					      instance["_init_event"](nt,tree,closeother);
-					      t=new Date-t; console.log("_init_event:"+t);
-				      },15);
+				      t=new Date();
+				      instance["_init_event"](nt,tree,closeother);
+				      t=new Date-t; console.log("_init_event:"+t);
 				      t=new Date();
 				      tree.appendChild(nt[0]);
 				      t=new Date-t; console.log("append:"+t);
@@ -357,13 +371,10 @@
 		      },
 		//初始化树的事件
 		_checkbox_event:function(obj,tree,linkage,closeother){
-					var instance = this,ins = $(obj).find("li > ins:first-child");
-					if(ins.length == 0){ins = $(obj).find("> ins:first-child");}
-					ins.click(function(){
+					var instance = this,$obj=$(obj);
+					$obj.delegate("li > ins:first-child","click",function(){
 						instance["_node_open_close"].apply(this,[instance,tree,closeother]);
-					});
-
-					$(obj).find("a").click(function(){
+					}).delegate("a","click",function(){
 						var callback = $(tree).data("fun")._callback;
 						if($.isFunction(callback)){callback.apply($(this).parent().get(0));
 							instance["_checkbox_click"].call(this,linkage);return false;
@@ -414,17 +425,13 @@
 
 		//初始化树的事件
 		_init_event:function(obj,tree,closeother){
-				    var instance,ins,$obj,a;
-				    $obj=$(obj);	
+				    var instance,$obj,$obj=$(obj);	
 				    instance = this;
-				    insSelector = "li > ins:first-child";
-				    //???if(insSelector.length == 0){insSelector = "> ins:first-child";}
-				    $obj.delegate(insSelector,"click",function(){
+				    $obj.delegate("li>ins:first-child","click",function(){
 				    	instance["_node_open_close"].apply(this,[instance,tree,closeother]);
-				    });
-				    $obj.delegate("a","dblclick",function(){
+				    }).delegate("a","dblclick",function(){
 					    instance["_node_open_close"].apply($(this).prev()[0],[instance,tree]);return false;
-				    });$obj.delegate("a:not([disabled])",{
+				    }).delegate("a:not([disabled])",{
 					    "click":function(){
 						    $(tree).find("a.st-clicked").removeClass("st-clicked");
 						    $(this).addClass("st-clicked");
